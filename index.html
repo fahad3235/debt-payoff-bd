@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Debt Payoff BD &#8212; Snowball vs Avalanche Planner</title>
+<meta name="description" content="Offline bilingual debt payoff planner for Bangladesh: snowball vs avalanche simulation, debt-free date, interest saved.">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <div>
+      <h1 data-i18n="appTitle">Debt Payoff BD</h1>
+      <p class="subtitle" data-i18n="subtitle">Snowball vs avalanche payoff planner &#8212; pay off every loan, card and due, fastest and cheapest.</p>
+    </div>
+    <button id="langBtn" class="lang-btn" type="button">&#2476;&#2494;&#2434;&#2482;&#2494;</button>
+  </div>
+</header>
+
+<main>
+  <nav class="tabs" role="tablist">
+    <button class="tab active" data-tab="debts" data-i18n="tabDebts" type="button">Debts</button>
+    <button class="tab" data-tab="plan" data-i18n="tabPlan" type="button">Plan</button>
+    <button class="tab" data-tab="data" data-i18n="tabData" type="button">Data</button>
+  </nav>
+
+  <section id="tab-debts" class="panel">
+    <h2 data-i18n="addDebt">Add debt</h2>
+    <form id="debtForm" novalidate>
+      <div class="grid2">
+        <label><span data-i18n="debtName">Debt name</span>
+          <input id="fName" type="text" maxlength="80" placeholder="e.g. Credit card / Personal loan" autocomplete="off"></label>
+        <label><span data-i18n="balance">Balance (&#2547;)</span>
+          <input id="fBalance" type="text" inputmode="decimal" placeholder="50000" autocomplete="off"></label>
+        <label><span data-i18n="apr">APR % per year</span>
+          <input id="fApr" type="text" inputmode="decimal" placeholder="24" autocomplete="off"></label>
+        <label><span data-i18n="minPayment">Minimum monthly payment (&#2547;)</span>
+          <input id="fMin" type="text" inputmode="decimal" placeholder="2000" autocomplete="off"></label>
+      </div>
+      <p id="formError" class="error" hidden></p>
+      <button id="saveDebtBtn" class="btn primary" type="submit" data-i18n="addDebt">Add debt</button>
+      <button id="cancelEditBtn" class="btn" type="button" data-i18n="cancel" hidden>Cancel</button>
+    </form>
+
+    <h2 data-i18n="yourDebts">Your debts</h2>
+    <p id="noDebts" class="empty" data-i18n="noDebts">No debts yet. Add your first debt above.</p>
+    <ul id="debtList" class="debt-list"></ul>
+  </section>
+
+  <section id="tab-plan" class="panel" hidden>
+    <h2 data-i18n="extraTitle">Extra monthly payment</h2>
+    <div class="extra-row">
+      <label class="extra-input"><span data-i18n="extra">Extra monthly payment (&#2547;)</span>
+        <input id="extraInput" type="text" inputmode="decimal" placeholder="0" autocomplete="off"></label>
+      <div class="presets" id="presets"></div>
+    </div>
+    <p class="stat-line"><span data-i18n="monthlyBudget">Total monthly budget</span>: <strong id="budgetVal"></strong></p>
+    <p id="noPlan" class="empty" data-i18n="noPlan">Add at least one debt to see your payoff plan.</p>
+
+    <div id="planResults" hidden>
+      <div class="cards">
+        <article class="card" id="snowCard">
+          <h3 data-i18n="snowball">Snowball &#8212; smallest balance first</h3>
+          <p class="big"><span id="snowMonths"></span> <span data-i18n="monthsWord">months</span></p>
+          <p><span data-i18n="debtFreeDate">Debt-free date</span>: <strong id="snowDate"></strong></p>
+          <p><span data-i18n="totalInterest">Total interest</span>: <strong id="snowInterest"></strong></p>
+          <p><span data-i18n="totalPaid">Total paid</span>: <strong id="snowPaid"></strong></p>
+          <h4 data-i18n="payoffOrder">Payoff order</h4>
+          <ol id="snowOrder"></ol>
+        </article>
+        <article class="card recommended" id="avalCard">
+          <h3 data-i18n="avalanche">Avalanche &#8212; highest APR first</h3>
+          <p class="big"><span id="avalMonths"></span> <span data-i18n="monthsWord">months</span></p>
+          <p><span data-i18n="debtFreeDate">Debt-free date</span>: <strong id="avalDate"></strong></p>
+          <p><span data-i18n="totalInterest">Total interest</span>: <strong id="avalInterest"></strong></p>
+          <p><span data-i18n="totalPaid">Total paid</span>: <strong id="avalPaid"></strong></p>
+          <h4 data-i18n="payoffOrder">Payoff order</h4>
+          <ol id="avalOrder"></ol>
+        </article>
+      </div>
+      <p class="verdict"><span id="verdictText"></span></p>
+      <p id="neverHint" class="error" hidden></p>
+
+      <h3 data-i18n="balanceChart">Total balance over time</h3>
+      <div class="legend"><span class="sw snow"></span><span data-i18n="snowballShort">Snowball</span> <span class="sw aval"></span><span data-i18n="avalancheShort">Avalanche</span></div>
+      <svg id="chart" viewBox="0 0 600 220" role="img" aria-label="Balance over time chart"></svg>
+
+      <h3 data-i18n="perDebt">Per-debt payoff (avalanche)</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th data-i18n="thDebt">Debt</th><th data-i18n="thMonth">Payoff month</th><th data-i18n="thInterest">Interest paid</th></tr></thead>
+          <tbody id="perDebtBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section id="tab-data" class="panel" hidden>
+    <h2 data-i18n="dataTitle">Export / import / erase</h2>
+    <p data-i18n="dataHint">Your data lives only in this browser (localStorage). Export a backup, or import one to restore.</p>
+    <div class="data-actions">
+      <button id="exportBtn" class="btn primary" type="button" data-i18n="export">Export JSON</button>
+      <label class="btn" for="importFile" data-i18n="import">Import JSON</label>
+      <input id="importFile" type="file" accept=".json,application/json" hidden>
+    </div>
+    <p id="importMsg" class="msg" hidden></p>
+    <hr>
+    <h3 data-i18n="erase">Erase all data</h3>
+    <p data-i18n="typeDelete">Type DELETE to confirm</p>
+    <div class="erase-row">
+      <input id="eraseInput" type="text" placeholder="DELETE" autocomplete="off">
+      <button id="eraseBtn" class="btn danger" type="button" data-i18n="erase">Erase all data</button>
+    </div>
+    <p id="eraseMsg" class="msg" hidden></p>
+  </section>
+
+  <footer>
+    <p data-i18n="disclaimer">Educational estimate only &#8212; not financial advice. Interest is compounded monthly; real lenders may use daily accrual, fees or different rounding.</p>
+  </footer>
+</main>
+
+<script src="js/logic.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
